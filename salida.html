@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Web con Flexbox</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Función para manejar la actualización del valor en el cliente
+        function handleDirectionValueUpdate(direccion) {
+          switch(direccion){
+            case 'arriba':
+              document.getElementById('arriba_izquierda').style.backgroundColor = 'white';
+              document.getElementById('arriba_derecha').style.backgroundColor = 'white';
+              document.getElementById('abajo_izquierda').style.backgroundColor = 'black';
+              document.getElementById('abajo_derecha').style.backgroundColor = 'black';
+              break;
+            case 'abajo':
+              document.getElementById('arriba_izquierda').style.backgroundColor = 'black';
+              document.getElementById('arriba_derecha').style.backgroundColor = 'black';
+              document.getElementById('abajo_izquierda').style.backgroundColor = 'white';
+              document.getElementById('abajo_derecha').style.backgroundColor = 'white';
+              break;
+            case 'izquierda':
+              document.getElementById('arriba_izquierda').style.backgroundColor = 'black';
+              document.getElementById('arriba_derecha').style.backgroundColor = 'white';
+              document.getElementById('abajo_izquierda').style.backgroundColor = 'black';
+              document.getElementById('abajo_derecha').style.backgroundColor = 'white';
+              break;
+            case 'derecha':
+              document.getElementById('arriba_izquierda').style.backgroundColor = 'white';
+              document.getElementById('arriba_derecha').style.backgroundColor = 'black';
+              document.getElementById('abajo_izquierda').style.backgroundColor = 'white';
+              document.getElementById('abajo_derecha').style.backgroundColor = 'black';
+              break;
+            default:  
+              document.getElementById('arriba_izquierda').style.backgroundColor = 'black';
+              document.getElementById('arriba_derecha').style.backgroundColor = 'black';
+              document.getElementById('abajo_izquierda').style.backgroundColor = 'black';
+              document.getElementById('abajo_derecha').style.backgroundColor = 'black';
+          }
+        }
+
+        // Escuchar eventos de actualización de valor desde el servidor
+        socket.on('directionValueUpdated', handleDirectionValueUpdate);
+
+        // Función para enviar una solicitud al servidor para actualizar el valor
+        async function setDirectionValue(direccion) {
+            try{
+                const response = await fetch(`/setDirectionValue/${direccion}`, { method: 'POST' });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        console.log('Valor actualizado con éxito');
+                    } else {
+                        console.error('Error al actualizar el valor:', data.error);
+                    }
+                } else {
+                    console.error('Error en la solicitud:', response.statusText);
+                }
+            }
+            catch(err){
+                console.error('Error al enviar la solicitud:', error)
+            }
+        }
+    </script>    
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="item" id="arriba_izquierda"></div>
+            <div class="item" id="arriba_derecha"></div>
+        </div>
+        <div class="row">
+            <div class="item" id="abajo_izquierda"></div>
+            <div class="item" id="abajo_derecha"></div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<style>
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.row {
+    display: flex;
+    flex: 1;
+}
+
+.item {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    border: 1px solid #000;
+}
+ 
+</style>

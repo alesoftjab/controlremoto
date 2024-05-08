@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Botones de Dirección</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #FFf0f0;
+      }
+      
+      .button-container {
+        display: grid;
+        grid-template-columns: repeat(3, 90px);
+        grid-template-rows: repeat(3, 90px);
+        gap: 5px;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .arrow-button {
+        width: 90px;
+        height: 90px;
+        background-color: #ccF;
+        border: 1px solid #999;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      
+      .arrow-button:hover {
+        background-color: #999;
+      }
+
+      .arrow-button.clicked {
+        background-color: #666;
+      }
+    </style>
+</head>
+<body>
+<div class="button-container">
+  <div></div>
+  <div class="arrow-button up" data-direccion="arriba">&#8593;</div>
+  <div></div>
+  <div class="arrow-button left" data-direccion="izquierda">&#8592;</div>
+  <div></div>
+  <div class="arrow-button right" data-direccion="derecha">&#8594;</div>
+  <div></div>
+  <div class="arrow-button down" data-direccion="abajo">&#8595;</div>
+  <div></div>
+</div>
+
+<script>
+    const socket = io();
+
+    // Función para enviar una solicitud al servidor para actualizar el valor
+    async function setDirectionValue(direccion) {
+        try{
+            const response = await fetch(`/setDirectionValue/${direccion}`, { method: 'POST' });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    console.log('Valor actualizado con éxito');
+                } else {
+                    console.error('Error al actualizar el valor:', data.error);
+                }
+            } else {
+                console.error('Error en la solicitud:', response.statusText);
+            }
+        }
+        catch(err){
+            console.error('Error al enviar la solicitud:', error)
+        }
+    }
+
+    //Vincular eventos a los elementos de la DOM
+    document.addEventListener("DOMContentLoaded", function() {
+    const arrowButtons = document.querySelectorAll('.arrow-button');
+
+    arrowButtons.forEach(button => {
+        button.addEventListener('mousedown', handlePress);
+        button.addEventListener('mouseup', handleRelease);
+        button.addEventListener('mouseleave', handleRelease);
+
+        button.addEventListener('touchstart', handlePress);
+        button.addEventListener('touchend', handleRelease);
+        button.addEventListener('touchcancel', handleRelease);
+    });
+
+    function handlePress(event) {
+        event.preventDefault();
+        const button = event.target;
+        button.classList.add('clicked');
+        const direccion = button.dataset.direccion;
+        setDirectionValue(direccion);
+        console.log(`Botón presionado hacia la dirección: ${direccion}`);
+    }
+
+    function handleRelease(event) {
+        const button = event.target;
+        button.classList.remove('clicked');
+        setDirectionValue("centro");
+        console.log("Se dejó de presionar el botón.");
+    }
+  });
+</script>
+</body>
+</html>
